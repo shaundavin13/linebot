@@ -1,19 +1,17 @@
-from flask import Flask, request, jsonify
-import requests
-from datetime import datetime
-import os
+import base64
+import hashlib
 import hmac
 import json
-import hashlib
-import base64
+import os
 
+import requests
+from flask import Flask, request, jsonify
 
 with open('env.json', 'r') as f:
     env_file = f.read()
     config = json.loads(env_file)
 
 app = Flask(__name__)
-
 
 access_token = config.get('ACCESS_TOKEN')
 channel_secret = config.get('CHANNEL_SECRET')
@@ -35,8 +33,6 @@ def receive():
             return jsonify({'success': False, 'error': 'Invalid signature'})
         event = request.json.get('events')[0] # returns list so we access first element
         source = event.get('source')
-        if source is None:
-            abort(400)
         user_id = source.get('userId')
 
         try:
@@ -50,7 +46,7 @@ def receive():
         except Exception as e:
             return jsonify({'success': False, 'error': e})
         else:
-            return jsonify(dict(success=successful))
+            return jsonify({'success': True})
 
 
 @app.route('/push', methods=['POST'])
